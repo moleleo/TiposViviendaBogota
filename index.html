@@ -1,0 +1,863 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>VA UNIANDES - Tipos de Vivienda en Bogotá</title>
+<style type="text/css">
+
+	h2 {
+	  font: 24px sans-serif;
+	  font-weight: bold;
+	}
+	
+	h3 {
+	  font: 16px sans-serif;
+	  font-weight: bold;
+	}
+
+	p {
+	  font: 14px sans-serif;
+	}
+	
+	div.tooltip {
+	  position: absolute;
+	  text-align: center;
+	  padding: 2px;
+	  font: 12px sans-serif;
+	  font-weight: bold;
+	  background: lightgray;
+	  border: 0px;
+	  border-radius: 3px;
+	  pointer-events: none;
+	} 
+
+	.axis text {
+	  font: 11px sans-serif;
+	  font-weight: bold;
+	}
+
+	.legend text {
+	  font: 12px sans-serif;
+	  font-weight: bold;
+	}
+
+	.about text {
+	  font: 10px sans-serif;
+	  //font-weight: bold;
+	}
+	
+	.axis line,
+	.axis path {
+	  fill: none;
+	  stroke: #000;
+	  shape-rendering: crispEdges;
+	}
+  
+	.path-line {
+	  fill: none;
+	  stroke: yellow;
+	  stroke-width: 1.5px;
+	}
+  
+	svg {
+	  background: #f0f0f0;
+	}
+
+</style>
+</head>
+<body>
+
+<h2 align="center">¿Cuál es el tipo de vivienda que predomina en Bogotá?</h2>
+<br></br>
+
+<p>Según datos publicados por la Unidad Administrativa Especial de Catastro Distrital (UAECD) en el portal de Datos Abiertos, el tipo de vivienda que predomina en la capital es la casa de hasta 3 pisos, seguida muy de cerca por las viviendas ubicadas en conjuntos residenciales (también conocidos como conjuntos cerrados o propiedades horizontales) de 4 o más pisos, y en menor medida por las viviendas ubicadas en conjuntos residenciales de menos de 3 pisos y las casas de más de 4 pisos.</p>
+<div  align="center" id='stackedBarChartEstrato'></div>
+<br></br>
+
+
+<h3>Tendencia por estrato</h3>
+<p>Al realizar un análisis por estrato, utilizando solamente los dos tipos de vivienda con mayor persencia en la capital, se observa cómo en los estratos socioeconómicos bajos la proporción de casas es mucho mayor, mientras que en los estratos altos es mayor la proporción de viviendas en conjuntos residenciales.</p>
+<div  align="center" id='stackedBarChartEstratoLeo'></div>
+<p>En la anterior visualización también destacan los siguientes aspectos:</p>
+<p>- La presencia de viviendas en conjuntos residenciales en estrato 1, que corresponden a proyectos fruto de la políticas de Vivienda de Interés Social (VIS) y Vivienda de Interés Prioritario (VIP) puestas en marcha por el gobierno en los últimos años.</p>
+<p>- El equilibrio entre el porcentaje de viviendas en conjuntos residenciales y las casas para el estrato 3.</p>
+<p>- El alto porcentaje de viviendas en conjuntos residenciales para los estratos 4, 5 y 6, lo que indica que en dichos estratos la ciudad es más densa.</p>
+
+
+<br></br>
+<h3>Tendencia por Localidad</h3>
+<p>Al analizar los datos de casas contra viviendas en conjuntos residenciales por Localidad es un poco más dificil llegar a algún tipo de conclusión.</p>
+
+<div  align="center" id='stackedBarChartLocalidad'></div>
+<p>En la anterior visualización destacan los siguientes elementos:</p>
+
+<p>- La desproporción a favor de los conjuntos residenciales en algunas de las localidades más tradicionales de la capital: Teusaquillo y Chapinero.</p>
+<p>- La paridad entre los dos tipos de vivienda en otras localidades, también tradicionales: La Candelaria y Santa Fe.</p>
+<p>- En las localidades con mayor número de viviendas registradas (Suba, Kennedy, Engativá), las casas de 3 o menos pisos aún son mayoría.</p>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>	
+
+	var dataTotal = [
+		{"nomGroup":"Casas de 4 o más pisos",
+			"numGroup":"1",
+			"Total":8848,
+			"Estrato 1":147,
+			"Estrato 2":2528,
+			"Estrato 3":5476,
+			"Estrato 4":508,
+			"Estrato 5":96,
+			"Estrato 6":93
+		},
+		{"nomGroup":"Conjuntos de 3 o menos pisos",
+			"numGroup":"2",
+			"Total":155925,
+			"Estrato 1":1008,
+			"Estrato 2":86415,
+			"Estrato 3":44371,
+			"Estrato 4":16234,
+			"Estrato 5":4952,
+			"Estrato 6":2945
+		},
+		{"nomGroup":"Conjuntos de 4 o más pisos",
+			"numGroup":"3",
+			"Total":822124,
+			"Estrato 1":8733,
+			"Estrato 2":136005,
+			"Estrato 3":308071,
+			"Estrato 4":225830,
+			"Estrato 5":76807,
+			"Estrato 6":66678
+		},
+		{"nomGroup":"Casas de 3 o menos pisos",
+			"numGroup":"4",
+			"Total":940257,
+			"Estrato 1":148681,
+			"Estrato 2":447136,
+			"Estrato 3":294541,
+			"Estrato 4":35978,
+			"Estrato 5":10428,
+			"Estrato 6":3493
+		},
+	]; 
+
+	var dataLocalidad = [
+		{"nomGroup":"Sumapaz","numGroup":"20",
+			"Total":941,
+			"Casas de 4 o más pisos":0,
+			"Conjuntos de 3 o menos pisos":0,
+			"Casas de 3 o menos pisos":941,
+			"Conjuntos de 4 o más pisos":0
+		},
+		{"nomGroup":"La Candelaria","numGroup":"17",
+			"Total":4929,
+			"Casas de 4 o más pisos":50,
+			"Conjuntos de 3 o menos pisos":156,
+			"Casas de 3 o menos pisos":2257,
+			"Conjuntos de 4 o más pisos":2466
+		},
+		{"nomGroup":"Los Mártires","numGroup":"14",
+			"Total":17575,
+			"Casas de 4 o más pisos":591,
+			"Conjuntos de 3 o menos pisos":115,
+			"Casas de 3 o menos pisos":9629,
+			"Conjuntos de 4 o más pisos":7240
+		},
+		{"nomGroup":"Antonio Nariño","numGroup":"15",
+			"Total":18701,
+			"Casas de 4 o más pisos":580,
+			"Conjuntos de 3 o menos pisos":1116,
+			"Casas de 3 o menos pisos":12968,
+			"Conjuntos de 4 o más pisos":4037
+		},
+		{"nomGroup":"Santa Fe","numGroup":"3",
+			"Total":27863,
+			"Casas de 4 o más pisos":168,
+			"Conjuntos de 3 o menos pisos":696,
+			"Casas de 3 o menos pisos":13210,
+			"Conjuntos de 4 o más pisos":13789
+		},
+		{"nomGroup":"Tunjuelito","numGroup":"6",
+			"Total":33515,
+			"Casas de 4 o más pisos":378,
+			"Conjuntos de 3 o menos pisos":914,
+			"Casas de 3 o menos pisos":23093,
+			"Conjuntos de 4 o más pisos":9130
+		},
+		{"nomGroup":"Barrios Unidos","numGroup":"122",
+			"Total":36569,
+			"Casas de 4 o más pisos":515,
+			"Conjuntos de 3 o menos pisos":638,
+			"Casas de 3 o menos pisos":20178,
+			"Conjuntos de 4 o más pisos":15238
+		},
+		{"nomGroup":"Teusaquillo ","numGroup":"13",
+			"Total":53689,
+			"Casas de 4 o más pisos":362,
+			"Conjuntos de 3 o menos pisos":852,
+			"Casas de 3 o menos pisos":10621,
+			"Conjuntos de 4 o más pisos":41854
+		},
+		{"nomGroup":"Puente Aranda","numGroup":"16",
+			"Total":55237,
+			"Casas de 4 o más pisos":1020,
+			"Conjuntos de 3 o menos pisos":1525,
+			"Casas de 3 o menos pisos":41473,
+			"Conjuntos de 4 o más pisos":11219
+		},
+		{"nomGroup":"Chapinero","numGroup":"2",
+			"Total":67377,
+			"Casas de 4 o más pisos":281,
+			"Conjuntos de 3 o menos pisos":280,
+			"Casas de 3 o menos pisos":5246,
+			"Conjuntos de 4 o más pisos":61570
+		},
+		{"nomGroup":"Rafael Uribe Uribe","numGroup":"18",
+			"Total":82326,
+			"Casas de 4 o más pisos":544,
+			"Conjuntos de 3 o menos pisos":2454,
+			"Casas de 3 o menos pisos":65738,
+			"Conjuntos de 4 o más pisos":13590
+		},
+		{"nomGroup":"San Cristóbal","numGroup":"4",
+			"Total":87231,
+			"Casas de 4 o más pisos":592,
+			"Conjuntos de 3 o menos pisos":3519,
+			"Casas de 3 o menos pisos":72315,
+			"Conjuntos de 4 o más pisos":10805
+		},
+		{"nomGroup":"Usme","numGroup":"5",
+			"Total":88023,
+			"Casas de 4 o más pisos":101,
+			"Conjuntos de 3 o menos pisos":3352,
+			"Casas de 3 o menos pisos":72874,
+			"Conjuntos de 4 o más pisos":11696
+		},
+		{"nomGroup":"Fontibón","numGroup":"9",
+			"Total":103357,
+			"Casas de 4 o más pisos":275,
+			"Conjuntos de 3 o menos pisos":13164,
+			"Casas de 3 o menos pisos":32270,
+			"Conjuntos de 4 o más pisos":57648
+		},
+		{"nomGroup":"Ciudad Bolivar","numGroup":"19",
+			"Total":140021,
+			"Casas de 4 o más pisos":293,
+			"Conjuntos de 3 o menos pisos":7187,
+			"Casas de 3 o menos pisos":111580,
+			"Conjuntos de 4 o más pisos":20961
+		},
+		{"nomGroup":"Bosa","numGroup":"7",
+			"Total":159128,
+			"Casas de 4 o más pisos":282,
+			"Conjuntos de 3 o menos pisos":28739,
+			"Casas de 3 o menos pisos":91473,
+			"Conjuntos de 4 o más pisos":38634
+		},
+		{"nomGroup":"Usaquén","numGroup":"1",
+			"Total":186194,
+			"Casas de 4 o más pisos":548,
+			"Conjuntos de 3 o menos pisos":10523,
+			"Casas de 3 o menos pisos":34251,
+			"Conjuntos de 4 o más pisos":140872
+		},
+		{"nomGroup":"Engativá","numGroup":"10",
+			"Total":200899,
+			"Casas de 4 o más pisos":1198,
+			"Conjuntos de 3 o menos pisos":11017,
+			"Casas de 3 o menos pisos":112841,
+			"Conjuntos de 4 o más pisos":75843
+		},
+		{"nomGroup":"Kennedy","numGroup":"8",
+			"Total":264731,
+			"Casas de 4 o más pisos":1602,
+			"Conjuntos de 3 o menos pisos":31001,
+			"Casas de 3 o menos pisos":124701,
+			"Conjuntos de 4 o más pisos":107427
+		},
+		{"nomGroup":"Suba","numGroup":"11",
+			"Total":300000,
+			"Total_":327483,
+			"Casas de 4 o más pisos":813,
+			"Conjuntos de 3 o menos pisos":38659,
+			"Casas de 3 o menos pisos":114245,
+			"Conjuntos de 4 o más pisos":173766
+		}
+	]; 	
+
+/*	
+	var dataEstrato = [
+		{"nomGroup":"Estrato 1",
+			"numGroup":"1",
+			"Total":15414,
+			"Casas de 3 o menos pisos":148681,
+			"Conjuntos de 4 o más pisos":8733
+		},
+		{"nomGroup":"Estrato 2",
+			"numGroup":"2",
+			"Total":583141,
+			"Casas de 3 o menos pisos":447136,
+			"Conjuntos de 4 o más pisos":136005
+		},
+		{"nomGroup":"Estrato 3",
+			"numGroup":"3",
+			"Total":602612,
+			"Casas de 3 o menos pisos":294541,
+			"Conjuntos de 4 o más pisos":308071
+		},
+		{"nomGroup":"Estrato 4",
+			"numGroup":"4",
+			"Total":261808,
+			"Casas de 3 o menos pisos":35978,
+			"Conjuntos de 4 o más pisos":225830
+		},
+		{"nomGroup":"Estrato 5",
+			"numGroup":"5",
+			"Total":87235,
+			"Casas de 3 o menos pisos":10428,
+			"Conjuntos de 4 o más pisos":76807
+		},
+		{"nomGroup":"Estrato 6",
+			"numGroup":"6",
+			"Total":70171,
+			"Casas de 3 o menos pisos":3493,
+			"Conjuntos de 4 o más pisos":66678
+		}
+	]; 	
+*/
+
+	var dataEstrato = [
+		{"nomGroup":"Estrato 1",
+			"numGroup":"1",
+			"Total":100,
+			"Casas de 3 o menos pisos":94.5,
+			"Conjuntos de 4 o más pisos":5.5
+		},
+		{"nomGroup":"Estrato 2",
+			"numGroup":"2",
+			"Total":100,
+			"Casas de 3 o menos pisos":76.7,
+			"Conjuntos de 4 o más pisos":23.3
+		},
+		{"nomGroup":"Estrato 3",
+			"numGroup":"3",
+			"Total":100,
+			"Casas de 3 o menos pisos":48.9,
+			"Conjuntos de 4 o más pisos":51.1
+		},
+		{"nomGroup":"Estrato 4",
+			"numGroup":"4",
+			"Total":100,
+			"Casas de 3 o menos pisos":13.7,
+			"Conjuntos de 4 o más pisos":86.3
+		},
+		{"nomGroup":"Estrato 5",
+			"numGroup":"5",
+			"Total":100,
+			"Casas de 3 o menos pisos":12,
+			"Conjuntos de 4 o más pisos":88
+		},
+		{"nomGroup":"Estrato 6",
+			"numGroup":"6",
+			"Total":100,
+			"Casas de 3 o menos pisos":5,
+			"Conjuntos de 4 o más pisos":95
+		}
+	]; 	
+
+ 	var keyEstrato = ["Casas de 3 o menos pisos","Conjuntos de 4 o más pisos"];
+ 	//var keyEstrato = ["Estrato 1","Estrato 2","Estrato 3","Estrato 4","Estrato 5","Estrato 6"];
+ 	var keyTotal = ["Total"];
+ 	//var keyLocalidad = ["Casas de 4 o más pisos","Conjuntos de 3 o menos pisos","Casas de 3 o menos pisos","Conjuntos de 4 o más pisos"];
+ 	var keyLocalidad = ["Casas de 3 o menos pisos","Conjuntos de 4 o más pisos"];
+	
+	var div = d3.select("body")
+		.append("div")
+		.attr("class", "tooltip")
+		.style("opacity", 0);
+		
+	var initStackedBarChartTipoEstrato = {
+	
+		draw: function(config) {  
+		
+			me = this,
+			domEle = config.element,
+			stackKey = config.key,
+			data = config.data,
+			margin = {top: config.marginTop, right: config.marginRight, bottom: config.marginBottom, left: config.marginLeft},
+			width = config.svgWidth - margin.left - margin.right,
+			height = config.svgHeight - margin.top - margin.bottom,
+			xScale = d3.scaleLinear().range([0, width]),
+			yScale = d3.scaleBand()
+				.domain(data.map(function (d) { return d.numGroup; }))    
+				.range([0,height]),
+			color = d3.scaleOrdinal().range(["#377eb8", "#4daf4a"]),
+			xAxis = d3.axisBottom(xScale),
+			yAxis = d3.axisLeft(yScale)
+				.tickSize(2)
+				.scale(yScale),
+			svg = d3.select("#"+domEle).append("svg")
+				.attr("width", width + margin.left + margin.right)
+				.attr("height", height + margin.top + margin.bottom)
+				.append("g")
+				.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+				
+			var stack = d3.stack()
+				.keys(stackKey)
+				//.order(d3.stackOrder)
+				.offset(d3.stackOffsetNone);
+				
+			var layers = stack(data);
+		
+			//data.sort(function(a, b) { return b.Total - a.Total; });
+			
+			var maxValue = d3.max(data, function(d) { return d.Total; });
+			xScale.domain([0, maxValue]).nice();
+			yScale.domain(data.map(function(d) { return d.nomGroup; })).padding(0.1);
+		
+			var layer = svg.selectAll(".layer")
+				.data(layers)
+				.enter().append("g")
+				.attr("class", "layer")
+				.style("fill", function(d, i) { return color(i); });
+				
+			var	series = 0;
+
+			layer.selectAll("rect")
+				.data(function(d) { return d; })
+				.enter().append("rect")
+				.attr("class", function(d) { return "rect_"+ series + "_" + Math.floor((series++)/data.length); })
+				.attr("x", function(d) { return xScale(d[0]); })
+				.attr("width", function(d) { return xScale(d[1]) - xScale(d[0]) })
+				.attr("y", function(d,i) { return yScale(data[i].nomGroup); })
+				.attr("height", yScale.bandwidth())
+				.on('mouseover', function (d,i){ 
+					var delta = d[1] - d[0]; 
+					div.transition()
+						.duration(500)
+						.style("opacity", .9);    
+					div.html(keyEstrato[Number(d3.select(this).attr("class").split("_")[2])] + ":</br>" + delta.toLocaleString() + "%")
+						.style("width", config.tooltipWidth)
+						.style("height", config.tooltipHeight)
+						.style("left", (d3.event.pageX) + "px")
+						.style("top", (d3.event.pageY) + "px"); 
+					z = "rect."+d3.select(this).attr("class");
+					layer.selectAll("rect")
+						.transition(500)
+						.style("fill-opacity", 0.3); 
+					layer.selectAll(z)
+						.transition(500)
+						.style("fill-opacity", 1);
+				})
+				.on("mouseout",function(){
+					div.transition()
+						.duration(200)
+						.style("opacity", 0);
+					layer.selectAll("rect")
+						.transition(200)
+						.style("fill-opacity", 1);         
+				});
+				svg.append("g")
+					.attr("class", "axis axis--x")
+					.attr("transform", "translate(0," + (height+5) + ")")
+					.call(xAxis);
+				svg.append("g")
+					.attr("class", "axis axis--y")
+					.attr("transform", "translate(0,0)")
+					.call(yAxis);
+
+			var svgLegend = svg.append("svg")
+				.attr("width", width)
+				.attr("height", 20 )
+				.attr("x", 0 )
+				.attr("y", height + 40 )
+        
+			var dataL = 0;
+			var offset = config.legendOffset;
+        
+			var legend = svgLegend.selectAll('.legend')
+				.data(stackKey)
+				.enter().append('g')
+				.attr("class", "legend")
+				.attr("transform", function (d, i) {
+					if (i === 0) {
+						dataL = d.length + offset 
+						return "translate(0,0)"
+					} else { 
+						var newdataL = dataL
+						dataL +=  d.length + offset
+						return "translate(" + (newdataL) + ",0)"
+					}
+				})
+        
+			legend.append('rect')
+				.attr("x", 0)
+				.attr("y", 0)
+				.attr("width", 10)
+				.attr("height", 10)
+				.style("fill", function (d, i) {
+					return color(i)
+				})
+        
+			legend.append('text')
+				.attr("x", 20)
+				.attr("y", 10)
+				.text(function (d, i) {
+					return d
+				})
+				
+			var svgAbout = svg.append("svg")
+				.attr("width", width)
+				.attr("height", 11 )
+				.attr("x", 270 )
+				.attr("y", height+65 )
+				.attr("class", "about")
+        
+			svgAbout.append('text')
+				.attr("x", 20)
+				.attr("y", 10)
+				.text("Fuente: UAECD, Agosto de 2017")				
+
+		}
+	}
+		
+		
+		
+	var initStackedBarChartTotal = {
+	
+		draw: function(config) {  
+		
+			me = this,
+			domEle = config.element,
+			stackKey = config.key,
+			data = config.data,
+			margin = {top: config.marginTop, right: config.marginRight, bottom: config.marginBottom, left: config.marginLeft},
+			width = config.svgWidth - margin.left - margin.right,
+			height = config.svgHeight - margin.top - margin.bottom,
+			xScale = d3.scaleLinear().range([0, width]),
+			yScale = d3.scaleBand()
+				.domain(data.map(function (d) { return d.numGroup; }))    
+				.range([0,height]),
+			color = d3.scaleOrdinal().range(["#e34a33"]),
+			xAxis = d3.axisBottom(xScale),
+			yAxis = d3.axisLeft(yScale)
+				.tickSize(2)
+				.scale(yScale),
+			svg = d3.select("#"+domEle).append("svg")
+				.attr("width", width + margin.left + margin.right)
+				.attr("height", height + margin.top + margin.bottom)
+				.append("g")
+				.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+				
+			var stack = d3.stack()
+				.keys(stackKey)
+				//.order(d3.stackOrder)
+				.offset(d3.stackOffsetNone);
+				
+			var layers = stack(data);
+		
+			//data.sort(function(a, b) { return b.Total - a.Total; });
+			
+			var maxValue = d3.max(data, function(d) { return d.Total; });
+			xScale.domain([0, maxValue]).nice();
+			yScale.domain(data.map(function(d) { return d.nomGroup; })).padding(0.1);
+		
+			var layer = svg.selectAll(".layer")
+				.data(layers)
+				.enter().append("g")
+				.attr("class", "layer")
+				.style("fill", function(d, i) { return color(i); });
+				
+			var	series = 0;
+
+			layer.selectAll("rect")
+				.data(function(d) { return d; })
+				.enter().append("rect")
+				.attr("class", function(d) { return "rect_"+ series + "_" + Math.floor((series++)/data.length); })
+				.attr("x", function(d) { return xScale(d[0]); })
+				.attr("width", function(d) { return xScale(d[1]) - xScale(d[0]) })
+				.attr("y", function(d,i) { return yScale(data[i].nomGroup); })
+				.attr("height", yScale.bandwidth())
+				.on('mouseover', function (d,i){ 
+					var delta = d[1] - d[0]; 
+					div.transition()
+						.duration(500)
+						.style("opacity", .9);    
+					div.html(keyTotal[Number(d3.select(this).attr("class").split("_")[2])] + ":</br>" + delta.toLocaleString())
+						.style("width", config.tooltipWidth)
+						.style("height", config.tooltipHeight)
+						.style("left", (d3.event.pageX) + "px")
+						.style("top", (d3.event.pageY) + "px"); 
+					z = "rect."+d3.select(this).attr("class");
+					layer.selectAll("rect")
+						.transition(500)
+						.style("fill-opacity", 0.3); 
+					layer.selectAll(z)
+						.transition(500)
+						.style("fill-opacity", 1);
+				})
+				.on("mouseout",function(){
+					div.transition()
+						.duration(200)
+						.style("opacity", 0);
+					layer.selectAll("rect")
+						.transition(200)
+						.style("fill-opacity", 1);         
+				});
+				svg.append("g")
+					.attr("class", "axis axis--x")
+					.attr("transform", "translate(0," + (height+5) + ")")
+					.call(xAxis);
+				svg.append("g")
+					.attr("class", "axis axis--y")
+					.attr("transform", "translate(0,0)")
+					.call(yAxis);
+
+			var svgLegend = svg.append("svg")
+				.attr("width", width)
+				.attr("height", 20 )
+				.attr("x", 0 )
+				.attr("y", height + 40 )
+        
+			var dataL = 0;
+			var offset = config.legendOffset;
+        
+			var legend = svgLegend.selectAll('.legend')
+				.data(stackKey)
+				.enter().append('g')
+				.attr("class", "legend")
+				.attr("transform", function (d, i) {
+					if (i === 0) {
+						dataL = d.length + offset 
+						return "translate(0,0)"
+					} else { 
+						var newdataL = dataL
+						dataL +=  d.length + offset
+						return "translate(" + (newdataL) + ",0)"
+					}
+				})
+        
+			legend.append('rect')
+				.attr("x", 0)
+				.attr("y", 0)
+				.attr("width", 10)
+				.attr("height", 10)
+				.style("fill", function (d, i) {
+					return color(i)
+				})
+        
+			legend.append('text')
+				.attr("x", 20)
+				.attr("y", 10)
+				.text(function (d, i) {
+					return d
+				})
+				
+			var svgAbout = svg.append("svg")
+				.attr("width", width)
+				.attr("height", 11 )
+				.attr("x", 180 )
+				.attr("y", height+65 )
+				.attr("class", "about")
+        
+			svgAbout.append('text')
+				.attr("x", 20)
+				.attr("y", 10)
+				.text("Fuente: UAECD, Agosto de 2017")				
+
+		}
+	}
+
+	var initStackedBarChartLocalidadTipo = {
+	
+		draw: function(config) {  
+		
+			me = this,
+			domEle = config.element,
+			stackKey = config.key,
+			data = config.data,
+			margin = {top: config.marginTop, right: config.marginRight, bottom: config.marginBottom, left: config.marginLeft},
+			width = config.svgWidth - margin.left - margin.right,
+			height = config.svgHeight - margin.top - margin.bottom,
+			xScale = d3.scaleLinear().range([0, width]),
+			yScale = d3.scaleBand()
+				.domain(data.map(function (d) { return d.numGroup; }))    
+				.range([0,height]),
+			color = d3.scaleOrdinal().range(["#e7298a", "#7570b3", "#d95f02", "#1b9e77"]),
+			xAxis = d3.axisBottom(xScale),
+			yAxis = d3.axisLeft(yScale)
+				.tickSize(2)
+				.scale(yScale),
+			svg = d3.select("#"+domEle).append("svg")
+				.attr("width", width + margin.left + margin.right)
+				.attr("height", height + margin.top + margin.bottom)
+				.append("g")
+				.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+				
+			var stack = d3.stack()
+				.keys(stackKey)
+				//.order(d3.stackOrder)
+				.offset(d3.stackOffsetNone);
+				
+			var layers = stack(data);
+		
+			//data.sort(function(a, b) { return b.Total - a.Total; });
+			
+			var maxValue = d3.max(data, function(d) { return d.Total; });
+			xScale.domain([0, maxValue]).nice();
+			yScale.domain(data.map(function(d) { return d.nomGroup; })).padding(0.1);
+		
+			var layer = svg.selectAll(".layer")
+				.data(layers)
+				.enter().append("g")
+				.attr("class", "layer")
+				.style("fill", function(d, i) { return color(i); });
+				
+			var	series = 0;
+
+			layer.selectAll("rect")
+				.data(function(d) { return d; })
+				.enter().append("rect")
+				.attr("class", function(d) { return "rect_"+ series + "_" + Math.floor((series++)/data.length); })
+				.attr("x", function(d) { return xScale(d[0]); })
+				.attr("width", function(d) { return xScale(d[1]) - xScale(d[0]) })
+				.attr("y", function(d,i) { return yScale(data[i].nomGroup); })
+				.attr("height", yScale.bandwidth())
+				.on('mouseover', function (d,i){ 
+					var delta = d[1] - d[0]; 
+					div.transition()
+						.duration(500)
+						.style("opacity", .9);    
+					div.html(keyLocalidad[Number(d3.select(this).attr("class").split("_")[2])] + ":</br>" + delta.toLocaleString())
+						.style("width", config.tooltipWidth)
+						.style("height", config.tooltipHeight)
+						.style("left", (d3.event.pageX) + "px")
+						.style("top", (d3.event.pageY) + "px"); 
+					z = "rect."+d3.select(this).attr("class");
+					layer.selectAll("rect")
+						.transition(500)
+						.style("fill-opacity", 0.3); 
+					layer.selectAll(z)
+						.transition(500)
+						.style("fill-opacity", 1);
+				})
+				.on("mouseout",function(){
+					div.transition()
+						.duration(200)
+						.style("opacity", 0);
+					layer.selectAll("rect")
+						.transition(200)
+						.style("fill-opacity", 1);         
+				});
+				svg.append("g")
+					.attr("class", "axis axis--x")
+					.attr("transform", "translate(0," + (height+5) + ")")
+					.call(xAxis);
+				svg.append("g")
+					.attr("class", "axis axis--y")
+					.attr("transform", "translate(0,0)")
+					.call(yAxis);
+
+			var svgLegend = svg.append("svg")
+				.attr("width", width)
+				.attr("height", 20 )
+				.attr("x", 0 )
+				.attr("y", height + 40 )
+			
+			var dataL = 0;
+			var offset = config.legendOffset;
+			
+			var legend = svgLegend.selectAll('.legend')
+				.data(stackKey)
+				.enter().append('g')
+				.attr("class", "legend")
+				.attr("transform", function (d, i) {
+					if (i === 0) {
+						dataL = d.length + offset 
+						return "translate(0,0)"
+					} else { 
+						var newdataL = dataL
+						dataL +=  d.length + offset
+						return "translate(" + (newdataL) + ",0)"
+					}
+				})
+			
+			legend.append('rect')
+				.attr("x", 0)
+				.attr("y", 0)
+				.attr("width", 10)
+				.attr("height", 10)
+				.style("fill", function (d, i) {
+					return color(i)
+				})
+			
+			legend.append('text')
+				.attr("x", 20)
+				.attr("y", 10)
+				.text(function (d, i) {
+					return d
+				})
+          
+			var svgAbout = svg.append("svg")
+				.attr("width", width)
+				.attr("height", 11 )
+				.attr("x", 250 )
+				.attr("y", height+65 )
+				.attr("class", "about")
+        
+			svgAbout.append('text')
+				.attr("x", 20)
+				.attr("y", 10)
+				.text("Fuente: UAECD, Agosto de 2017")				
+				
+		}
+	}
+	
+	initStackedBarChartTotal.draw({
+		data: dataTotal,
+		key: keyTotal,
+		svgWidth: 1000,
+		svgHeight: 180,
+		marginTop: 20, 
+		marginRight: 50, 
+		marginBottom: 80, 
+		marginLeft: 170,
+		tooltipWidth: '100px',
+		tooltipHeight: '28px',
+		legendOffset: 75,
+		element: 'stackedBarChartEstrato'
+	});	
+
+	initStackedBarChartTipoEstrato.draw({
+		data: dataEstrato,
+		key: keyEstrato,
+		svgWidth: 1000,
+		svgHeight: 200,
+		marginTop: 20, 
+		marginRight: 50, 
+		marginBottom: 80, 
+		marginLeft: 80,
+		tooltipWidth: '180px',
+		tooltipHeight: '28px',
+		legendOffset: 200,
+		element: 'stackedBarChartEstratoLeo'
+	});	
+	
+	initStackedBarChartLocalidadTipo.draw({
+		data: dataLocalidad,
+		key: keyLocalidad,
+		svgWidth: 1000,
+		svgHeight: 400,
+		marginTop: 20, 
+		marginRight: 50, 
+		marginBottom: 80, 
+		marginLeft: 105,
+		tooltipWidth: '190px',
+		tooltipHeight: '28px',
+		legendOffset: 190,
+		element: 'stackedBarChartLocalidad'
+	});	
+	
+</script>		
+</body>
+</html>
